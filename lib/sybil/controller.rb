@@ -1,4 +1,4 @@
-module Persona
+module Sybil
   class Controller < ActionController::Base
     def login
       # TODO: Allow config override
@@ -14,4 +14,4 @@ module Persona
   end
 end
 
-::PersonaController = Persona::Controller
+::SybilController = Sybil::Controller

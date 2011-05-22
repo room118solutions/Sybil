@@ -1,3 +1,3 @@
-module Persona
+module Sybil
   VERSION = "0.0.1"
 end

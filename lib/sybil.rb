@@ -1,0 +1,1 @@
+require "sybil/railtie" if defined?(Rails) && Rails.version >= "3" && Rails.env == 'development'

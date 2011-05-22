@@ -1,10 +1,10 @@
 require 'rails'
-require 'persona/controller'
+require 'sybil/controller'
 
-module Persona
+module Sybil
   class Railtie < Rails::Railtie
     
-    initializer "persona.configure_routes" do |app|
+    initializer "sybil.configure_routes" do |app|
       app.routes_reloader.paths << File.join(File.dirname(__FILE__), "..", "..", "rails", "routes.rb")
     end
     
@@ -21,7 +21,8 @@ module Persona
             response.body = response.body.insert(response.body.index('</body>'),ERB.new(File.read(File.dirname(__FILE__)+'/user_picker.html.erb')).result(binding))
           end
         end
-      end
+      end unless @not_first_run
+      @not_first_run ||= true
     end
   end
 end
