@@ -1,0 +1,43 @@
+<div id="persona_user_picker" style="display:none;position:absolute;left:25%;width:50%;padding: 20px; background-color:rgba(0,0,0,.8); text-align:center;border-radius:5px;box-shadow: 0 0 5px 5px rgba(0,0,0,.5);">
+	<h1 style="color:white;border-bottom:solid white 1px;padding-bottom:5px">Persona</h1>
+	<br />
+	<select name="id">
+		<option value="logout" <%= "selected" unless current_user %>>Guest</option>
+	<% @users.each do |u| %>
+		<option value="<%= u[:id] %>" <%= "selected" if current_user and current_user.id == u[:id] %>><%= u[:name] %></option>
+	<% end %>
+	</select>
+	<input type="submit" value="Switch">
+</div>
+<script>
+	$up = $('#persona_user_picker');
+	$up.css('top', -($up.height()+40))
+	function hidePersonaUserPicker(){
+		$up.animate({top: -($up.height()+40)}, 200, function(){$up.hide();});
+	}
+	$up.find('input[type=submit]').click(function(){
+		id = $up.find('select[name=id]').val();
+		if(id == 'logout')
+			$.get('<%= persona_logout_path %>', function(){ location.reload(true); });
+		else
+			$.post('<%= persona_login_path %>', { id: id }, function() { location.reload(true); });
+		hidePersonaUserPicker();
+	});
+	$(document).keypress(function(e){
+		if((e.keyCode==21) || (e.ctrlKey && (e.charCode==117))){
+			if($up.filter(':visible').length==0)
+			{
+				$up.show();
+				$up.animate({top: '0'}, 200);
+			}else{
+				hidePersonaUserPicker();
+			}
+		}
+	});
+	$('body').click(function(e){
+		$target = $(e.target);
+		if(!$target.is('#persona_user_picker') && $target.parents('#persona_user_picker').length==0)
+			if($up.filter(':visible').length>0)
+				hidePersonaUserPicker();
+	});
+</script>
