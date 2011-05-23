@@ -10,34 +10,36 @@
 	<input type="submit" value="Switch">
 </div>
 <script>
-	$up = $('#sybil_user_picker');
-	$up.css('top', -($up.height()+40))
-	function hideSybilUserPicker(){
-		$up.animate({top: -($up.height()+40)}, 200, function(){$up.hide();});
-	}
-	$up.find('input[type=submit]').click(function(){
-		id = $up.find('select[name=id]').val();
-		if(id == 'logout')
-			$.get('<%= sybil_logout_path %>', function(){ location.reload(true); });
-		else
-			$.post('<%= sybil_login_path %>', { id: id }, function() { location.reload(true); });
-		hideSybilUserPicker();
-	});
-	$(document).keypress(function(e){
-		if((e.keyCode==21) || (e.ctrlKey && (e.charCode==117))){
-			if($up.filter(':visible').length==0)
-			{
-				$up.show();
-				$up.animate({top: '0'}, 200);
-			}else{
-				hideSybilUserPicker();
-			}
+	$(document).ready(function(){
+		$up = $('#sybil_user_picker');
+		$up.css('top', -($up.height()+40))
+		function hideSybilUserPicker(){
+			$up.animate({top: -($up.height()+40)}, 200, function(){$up.hide();});
 		}
-	});
-	$('body').click(function(e){
-		$target = $(e.target);
-		if(!$target.is('#sybil_user_picker') && $target.parents('#sybil_user_picker').length==0)
-			if($up.filter(':visible').length>0)
-				hideSybilUserPicker();
+		$up.find('input[type=submit]').click(function(){
+			id = $up.find('select[name=id]').val();
+			if(id == 'logout')
+				$.get('<%= sybil_logout_path %>', function(){ location.reload(true); });
+			else
+				$.post('<%= sybil_login_path %>', { id: id }, function() { location.reload(true); });
+			hideSybilUserPicker();
+		});
+		$(document).keypress(function(e){
+			if((e.keyCode==21) || (e.ctrlKey && (e.charCode==117))){
+				if($up.filter(':visible').length==0)
+				{
+					$up.show();
+					$up.animate({top: '0'}, 200);
+				}else{
+					hideSybilUserPicker();
+				}
+			}
+		});
+		$('body').click(function(e){
+			$target = $(e.target);
+			if(!$target.is('#sybil_user_picker') && $target.parents('#sybil_user_picker').length==0)
+				if($up.filter(':visible').length>0)
+					hideSybilUserPicker();
+		});
 	});
 </script>
