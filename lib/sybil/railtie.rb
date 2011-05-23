@@ -10,7 +10,10 @@ module Sybil
     
     config.to_prepare do
       ApplicationController.class_eval do
-        after_filter do
+        after_filter :inject_sybil
+        
+        private
+        def inject_sybil
           # TODO: Move templates to config
           if ['application', 'manage', 'manage_guest'].include?(_layout)
             
@@ -21,8 +24,7 @@ module Sybil
             response.body = response.body.insert(response.body.index('</body>'),ERB.new(File.read(File.dirname(__FILE__)+'/user_picker.html.erb')).result(binding))
           end
         end
-      end unless @not_first_run
-      @not_first_run ||= true
+      end
     end
   end
 end
