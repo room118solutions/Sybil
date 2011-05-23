@@ -26,6 +26,7 @@
 			hideSybilUserPicker();
 		});
 		$(document).keypress(function(e){
+			// TODO: Make key combination configurable
 			if((e.keyCode==21) || (e.ctrlKey && (e.charCode==117))){
 				if($up.filter(':visible').length==0)
 				{
