@@ -3,28 +3,48 @@ require 'sybil/controller'
 
 module Sybil
   class Railtie < Rails::Railtie
+    config.sybil = ActiveSupport::OrderedOptions.new
     
     initializer "sybil.configure_routes" do |app|
       app.routes_reloader.paths << File.join(File.dirname(__FILE__), "..", "..", "rails", "routes.rb")
     end
+
+    initializer 'sybil.set_default_options' do |app|
+      options = app.config.sybil
+      
+      # templates - Array of string layout names that Sybil will inject into
+      options.layouts ||= %w{application}
+      
+      # inject_before - Either a string or a pattern that Sybil will inject itself before the last occurance of in response.body
+      options.inject_before ||= /<\/body>/i
+      
+      # users - A proc that is run within the context of Sybil's ApplicationController :after_filter and returns any object that responds to #each
+      # and returns objects that respond to #[:id] and #[:name] 
+      # This means that you can simply do something like @users = User.all, if your Users have a :name attribute.
+      # :id should be the id of the user, and :name will be what is displayed in Sybil's dropdown
+      options.users ||= proc { User.all }
+      
+      # login - A proc that is run within the context of Sybil's #login action. Should log the user identified by params[:id] in.
+      options.login ||= proc { UserSession.create(User.find(params[:id])) }
+      
+      # logout - A proc that is run within the context of Sybil's #logout action (used when 'Guest' is selected). Should log the current user out.
+      options.logout ||= proc { UserSession.find.destroy }
+    end
     
     config.to_prepare do
+            
       ApplicationController.class_eval do
         after_filter :inject_sybil
         
         private
         def inject_sybil
-          # TODO: Move templates to config
-          if ['application', 'manage', 'manage_guest'].include?(_layout)
-            
-            # TODO: move this to config
-            # @users must be set to anything that responds to #each and returns objects that respond to #[:id] and #[:name] 
-            # this means that you can simply do something like @users = User.all, if your Users have a :name attribute.
-            @users = User.all.map { |u| {:id => u.id, :name => "#{u.owner_type}: #{u.name} - #{u.email}" }}
-            response.body = response.body.insert(response.body.index('</body>'),ERB.new(File.read(File.dirname(__FILE__)+'/user_picker.html.erb')).result(binding))
+          if Rails.configuration.sybil.layouts.include?(_layout)
+            @users = instance_eval(&Rails.configuration.sybil.users)
+            response.body = response.body.insert(response.body.rindex(Rails.configuration.sybil.inject_before),ERB.new(File.read(File.join(File.dirname(__FILE__),'user_picker.html.erb'))).result(binding))
           end
         end
       end
+      
     end
   end
 end

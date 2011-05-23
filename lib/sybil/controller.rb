@@ -1,14 +1,12 @@
 module Sybil
   class Controller < ActionController::Base
     def login
-      # TODO: Allow config override
-      UserSession.create(User.find(params[:id]))
+      instance_eval(&Rails.configuration.sybil.login)
       render :nothing => true
     end
     
     def logout
-      # TODO: Allow config override
-      UserSession.find.destroy
+      instance_eval(&Rails.configuration.sybil.logout)
       render :nothing => true
     end
   end

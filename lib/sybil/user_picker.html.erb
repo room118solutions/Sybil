@@ -1,5 +1,5 @@
 <div id="sybil_user_picker" style="display:none;position:absolute;left:25%;width:50%;padding: 20px; background-color:rgba(0,0,0,.8); text-align:center;border-radius:5px;box-shadow: 0 0 5px 5px rgba(0,0,0,.5);z-index:999;">
-	<h1 style="color:white;border-bottom:solid white 1px;padding-bottom:5px">Sybil</h1>
+	<h1 style="color:white;border-bottom:solid white 1px;padding-bottom:5px;font-size:200%;">Sybil</h1>
 	<br />
 	<select name="id">
 		<option value="logout" <%= "selected" unless current_user %>>Guest</option>
@@ -10,6 +10,7 @@
 	<input type="submit" value="Switch">
 </div>
 <script>
+	// TODO: Either write non-jQuery version or include jQuery if it isn't already present
 	$(document).ready(function(){
 		$up = $('#sybil_user_picker');
 		$up.css('top', -($up.height()+40))
