@@ -15,6 +15,9 @@ module Sybil
       # templates - Array of string layout names that Sybil will inject into
       options.layouts ||= %w{application}
       
+      # content_type - Regex that is matched against response.content_type to determine if Sybil should inject
+      options.content_type ||= /text\/html/i
+      
       # inject_before - Either a string or a pattern that Sybil will inject itself before the last occurance of in response.body
       options.inject_before ||= /<\/body>/i
       
@@ -38,7 +41,7 @@ module Sybil
         
         private
         def inject_sybil
-          if Rails.configuration.sybil.layouts.include?(_layout)
+          if Rails.configuration.sybil.layouts.include?(_layout) and (response.content_type =~ Rails.configuration.sybil.content_type)
             @users = instance_eval(&Rails.configuration.sybil.users)
             response.body = response.body.insert(response.body.rindex(Rails.configuration.sybil.inject_before),ERB.new(File.read(File.join(File.dirname(__FILE__),'user_picker.html.erb'))).result(binding))
           end
