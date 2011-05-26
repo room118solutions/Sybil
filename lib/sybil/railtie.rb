@@ -43,7 +43,12 @@ module Sybil
         def inject_sybil
           if Rails.configuration.sybil.layouts.include?(_layout) and (response.content_type =~ Rails.configuration.sybil.content_type)
             @users = instance_eval(&Rails.configuration.sybil.users)
-            response.body = response.body.insert(response.body.rindex(Rails.configuration.sybil.inject_before),ERB.new(File.read(File.join(File.dirname(__FILE__),'user_picker.html.erb'))).result(binding))
+            insert_index = response.body.rindex(Rails.configuration.sybil.inject_before)
+            if insert_index
+              response.body = response.body.insert(insert_index,ERB.new(File.read(File.join(File.dirname(__FILE__),'user_picker.html.erb'))).result(binding))
+            else
+              logger.warn "Sybil: Unable to match value of sybil.inject_before in response from #{params[:controller]}##{params[:action]}. Aborting."
+            end
           end
         end
       end
