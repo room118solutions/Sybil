@@ -43,12 +43,13 @@ module Sybil
             
       ActionController::Base.class_eval do
         after_filter :inject_sybil
-        
+                
         private
         def inject_sybil
-          if Rails.configuration.sybil.layouts.include?(_layout) and (response.content_type =~ Rails.configuration.sybil.content_type)
+          if _layout and Rails.configuration.sybil.layouts.include?(_layout) and (response.content_type =~ Rails.configuration.sybil.content_type)
             @users = instance_eval(&(Rails.configuration.sybil.users.is_a?(Hash) ? Rails.configuration.sybil.users[_layout] : Rails.configuration.sybil.users))
             @current_user = instance_eval(&(Rails.configuration.sybil.current_user.is_a?(Hash) ? Rails.configuration.sybil.current_user[_layout] : Rails.configuration.sybil.current_user))
+            @layout = _layout
             insert_index = response.body.rindex(Rails.configuration.sybil.inject_before)
             if insert_index
               response.body = response.body.insert(insert_index,ERB.new(File.read(File.join(File.dirname(__FILE__),'user_picker.html.erb'))).result(binding))

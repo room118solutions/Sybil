@@ -1,12 +1,12 @@
 module Sybil
   class Controller < ActionController::Base
     def login
-      instance_eval(&Rails.configuration.sybil.login)
+      instance_eval(&(Rails.configuration.sybil.login.is_a?(Hash) ? Rails.configuration.sybil.login[params[:layout]] : Rails.configuration.sybil.login))
       render :nothing => true
     end
     
     def logout
-      instance_eval(&Rails.configuration.sybil.logout)
+      instance_eval(&(Rails.configuration.sybil.logout.is_a?(Hash) ? Rails.configuration.sybil.logout[params[:layout]] : Rails.configuration.sybil.logout))
       render :nothing => true
     end
   end

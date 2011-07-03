@@ -20,9 +20,12 @@
 		$up.find('input[type=submit]').click(function(){
 			id = $up.find('select[name=id]').val();
 			if(id == 'logout')
-				$.get('<%= sybil_logout_path %>', function(){ location.reload(true); });
+				$.get('<%= sybil_logout_path %>', { layout: '<%= @layout %>' }, function(){ location.reload(true); });
 			else
-				$.post('<%= sybil_login_path %>', { id: id }, function() { location.reload(true); });
+				$.post('<%= sybil_login_path %>', {
+					id: id,
+					layout: '<%= @layout %>'
+				}, function() { location.reload(true); });
 			hideSybilUserPicker();
 		});
 		$(document).keyup(function(e){
