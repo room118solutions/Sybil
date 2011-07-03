@@ -21,6 +21,8 @@ module Sybil
       # inject_before - Either a string or a pattern that Sybil will inject itself before the last occurance of in response.body
       options.inject_before ||= /<\/body>/i
       
+      ## The following options can also be Hashes, in the form of '_layout' => Proc, so you can use a different proc for each layout ##
+      
       # users - A proc that is run within the context of Sybil's ApplicationController :after_filter and returns any object that responds to #each
       # and returns objects that respond to #[:id] and #[:name] 
       # This means that you can simply do something like @users = User.all, if your Users have a :name attribute.
@@ -32,17 +34,21 @@ module Sybil
       
       # logout - A proc that is run within the context of Sybil's #logout action (used when 'Guest' is selected). Should log the current user out.
       options.logout ||= proc { UserSession.find.destroy }
+      
+      # Should return the current user session (needs to return false/nil if not logged in and respond to #id)
+      options.current_user ||= proc { current_user }
     end
     
     config.to_prepare do
             
-      ApplicationController.class_eval do
+      ActionController::Base.class_eval do
         after_filter :inject_sybil
         
         private
         def inject_sybil
           if Rails.configuration.sybil.layouts.include?(_layout) and (response.content_type =~ Rails.configuration.sybil.content_type)
-            @users = instance_eval(&Rails.configuration.sybil.users)
+            @users = instance_eval(&(Rails.configuration.sybil.users.is_a?(Hash) ? Rails.configuration.sybil.users[_layout] : Rails.configuration.sybil.users))
+            @current_user = instance_eval(&(Rails.configuration.sybil.current_user.is_a?(Hash) ? Rails.configuration.sybil.current_user[_layout] : Rails.configuration.sybil.current_user))
             insert_index = response.body.rindex(Rails.configuration.sybil.inject_before)
             if insert_index
               response.body = response.body.insert(insert_index,ERB.new(File.read(File.join(File.dirname(__FILE__),'user_picker.html.erb'))).result(binding))

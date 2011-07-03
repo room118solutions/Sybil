@@ -2,9 +2,9 @@
 	<h1 style="color:white;border-bottom:solid white 1px;padding-bottom:5px;font-size:200%;">Sybil</h1>
 	<br />
 	<select name="id">
-		<option value="logout" <%= "selected" unless current_user %>>Guest</option>
+		<option value="logout" <%= "selected" unless @current_user %>>Guest</option>
 	<% @users.each do |u| %>
-		<option value="<%= u[:id] %>" <%= "selected" if current_user and current_user.id == u[:id] %>><%= u[:name] %></option>
+		<option value="<%= u[:id] %>" <%= "selected" if @current_user and @current_user.id == u[:id] %>><%= u[:name] %></option>
 	<% end %>
 	</select>
 	<input type="submit" value="Switch">
