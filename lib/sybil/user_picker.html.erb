@@ -1,4 +1,4 @@
-<div id="sybil_user_picker" style="display:none;position:fixed;left:25%;width:50%;padding: 20px; background-color:rgba(0,0,0,.8); text-align:center;border-radius:5px;box-shadow: 0 0 5px 5px rgba(0,0,0,.5);z-index:999;">
+<form id="sybil_user_picker" style="display:none;position:fixed;left:25%;top:0;width:50%;padding: 20px; background-color:rgba(0,0,0,.8); text-align:center;border-radius:5px;box-shadow: 0 0 5px 5px rgba(0,0,0,.5);z-index:999;" action="<%= sybil_path %>" method="post">
 	<h1 style="color:white;border-bottom:solid white 1px;padding-bottom:5px;font-size:200%;">Sybil</h1>
 	<br />
 	<select name="id">
@@ -7,46 +7,90 @@
 		<option value="<%= u[:id] %>" <%= "selected" if @current_user and @current_user.id == u[:id] %>><%= u[:name] %></option>
 	<% end %>
 	</select>
+	<input type="hidden" name="layout" value="<%= @layout %>">
 	<input type="submit" value="Switch">
-</div>
+</form>
 <script>
-	// TODO: Either write non-jQuery version or include jQuery if it isn't already present
-	$(document).ready(function(){
-		$up = $('#sybil_user_picker');
-		$up.css('top', -($up.height()+40))
-		function hideSybilUserPicker(){
-			$up.animate({top: -($up.height()+40)}, 200, function(){$up.hide();});
+	// TODO: Thoroughly cross-browser test, because we're no longer using jQuery
+	// TODO: Is this the proper way to load this after the DOM is loaded??
+	var prevOnload = document.body.onload;
+	document.body.onload = function(){
+		if(prevOnload) prevOnload();
+		var up = document.getElementById('sybil_user_picker');
+		
+		// If jQuery is present, set up a var and position userpicker, since it'll be animated
+		if(window.jQuery){
+			var $up = $(up);
+			$up.css('top', -($up.height()+40));
 		}
-		$up.find('input[type=submit]').click(function(){
-			id = $up.find('select[name=id]').val();
-			if(id == 'logout')
-				$.get('<%= sybil_logout_path %>', { layout: '<%= @layout %>' }, function(){ location.reload(true); });
+		
+		// Hide UP, slide up if jQuery
+		function hideSybilUserPicker(){
+			if(window.jQuery)
+				$up.animate({top: -($up.height()+40)}, 200, function(){$up.hide();});
 			else
-				$.post('<%= sybil_login_path %>', {
-					id: id,
-					layout: '<%= @layout %>'
-				}, function() { location.reload(true); });
-			hideSybilUserPicker();
-		});
-		$(document).keyup(function(e){
-			// TODO: Make key combination configurable
+				up.style.display='none';
+		}
+		
+		// Show UP, slide down if jQuery
+		function showSybilUserPicker(){
+			if(window.jQuery)
+			{
+				$up.show();
+				$up.animate({top: '0'}, 200);
+			}else{
+				up.style.display='block';
+			}
+		}
+		
+		// Find submit button
+		for(var i=0;i<up.children.length;i++)
+		{
+			if(up.children[i].type=='submit')
+			{
+				up.children[i].onclick = function(){
+					// Create hidden redirect field, set value to current location, then hide the UP, and let the form submit
+					var redirectField = document.createElement('input');
+					redirectField.type="hidden";
+					redirectField.name="redirect";
+					redirectField.value=location.href;
+					up.appendChild(redirectField);
+					hideSybilUserPicker();
+				}
+			}
+		}
+		
+		// Add key listener
+		// TODO: Make key combination configurable
+		document.addEventListener('keyup', function(e){
 			if(e.ctrlKey && (e.keyCode==85)){
-				if($up.filter(':visible').length==0)
+				if(up.style.display == 'none')
 				{
-					$up.show();
-					$up.animate({top: '0'}, 200);
+					showSybilUserPicker();
 				}else{
 					hideSybilUserPicker();
 				}
 			}
-			
+				
 			if(e.keyCode == 27) hideSybilUserPicker();
 		});
-		$('body').click(function(e){
-			$target = $(e.target);
-			if(!$target.is('#sybil_user_picker') && $target.parents('#sybil_user_picker').length==0)
-				if($up.filter(':visible').length>0)
-					hideSybilUserPicker();
+		
+		// Add click listener to body, hide UP if click is anywhere but on the UP itself
+		document.body.addEventListener('click', function(e){
+			var childOfUserPicker = false;
+			var curNode = e.target;
+			// Iterate over parents of target (only check 3 nodes deep, that's as deep as the UP gets)
+			// If parent is UP, set boolean, if parent is body, break
+			for(var i=0;i<2;i++)
+			{
+				if(childOfUserPicker = (curNode === up)) break;
+				curNode = curNode.parentNode;
+				if(curNode == document.body) break;
+			}
+			
+			// Hide the UP if target isn't a child of the UP or the UP itself
+			if(!childOfUserPicker)
+				hideSybilUserPicker();
 		});
-	});
+	};
 </script>

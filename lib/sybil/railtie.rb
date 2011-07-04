@@ -29,11 +29,12 @@ module Sybil
       # :id should be the id of the user, and :name will be what is displayed in Sybil's dropdown
       options.users ||= proc { User.all }
       
-      # login - A proc that is run within the context of Sybil's #login action. Should log the user identified by params[:id] in.
+      # login - A proc that is run within the context of Sybil's #sybil action. Should log the user identified by params[:id] in.
       options.login ||= proc { UserSession.create(User.find(params[:id])) }
       
-      # logout - A proc that is run within the context of Sybil's #logout action (used when 'Guest' is selected). Should log the current user out.
-      options.logout ||= proc { UserSession.find.destroy }
+      # logout - A proc that is run within the context of Sybil's #sybil action (used when 'Guest' is selected). Should log the current user out.
+      # Note: It is NOT guaranteed that this won't be called when the user is already logged out, therefore it is the developer's responsibility to account for that
+      options.logout ||= proc { UserSession.find.destroy if UserSession.find }
       
       # Should return the current user session (needs to return false/nil if not logged in and respond to #id)
       options.current_user ||= proc { current_user }
