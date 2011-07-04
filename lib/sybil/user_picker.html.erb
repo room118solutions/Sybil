@@ -61,9 +61,8 @@
 		}
 		
 		// Add key listener
-		// TODO: Make key combination configurable
 		document.addEventListener('keyup', function(e){
-			if(e.ctrlKey && (e.keyCode==85)){
+			if(<%= Rails.configuration.sybil.toggle_user_picker %>){
 				if(up.style.display == 'none')
 				{
 					showSybilUserPicker();
@@ -72,7 +71,7 @@
 				}
 			}
 				
-			if(e.keyCode == 27) hideSybilUserPicker();
+			if(<%= Rails.configuration.sybil.close_user_picker %>) hideSybilUserPicker();
 		});
 		
 		// Add click listener to body, hide UP if click is anywhere but on the UP itself

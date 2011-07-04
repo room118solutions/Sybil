@@ -21,6 +21,14 @@ module Sybil
       # inject_before - Either a string or a pattern that Sybil will inject itself before the last occurance of in response.body
       options.inject_before ||= /<\/body>/i
       
+      # toggle_user_picker - This is a string of JS that, if true, toggles the user picker
+      # It is run in a keyup callback registered to the document body, 'e' contains the KeyboardEvent
+      options.toggle_user_picker ||= "e.ctrlKey && (e.keyCode==85)"
+      
+      # close_user_picker - This is a string of JS that, if true, closes the user picker
+      # It is run in a keyup callback registered to the document body, 'e' contains the KeyboardEvent
+      options.close_user_picker ||= "e.keyCode == 27"
+      
       ## The following options can also be Hashes, in the form of '_layout' => Proc, so you can use a different proc for each layout ##
       
       # users - A proc that is run within the context of Sybil's ApplicationController :after_filter and returns any object that responds to #each
