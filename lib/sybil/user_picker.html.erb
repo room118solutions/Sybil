@@ -11,11 +11,8 @@
 	<input type="submit" value="Switch">
 </form>
 <script>
-	// TODO: Thoroughly cross-browser test, because we're no longer using jQuery - definitely broken in FF4
-	// TODO: Is this the proper way to load this after the DOM is loaded??
-	var prevOnload = document.body.onload;
-	document.body.onload = function(){
-		if(prevOnload) prevOnload();
+	// TODO: Thoroughly cross-browser test, because we're no longer using jQuery (Tested in Chrome, FF4, Safari 5, and IE9, <IE9 is known to be broken, need to handle events the IE way)
+	window.addEventListener('load', function(){
 		var up = document.getElementById('sybil_user_picker');
 		
 		// If jQuery is present, set up a var and position userpicker, since it'll be animated
@@ -72,7 +69,7 @@
 			}
 				
 			if(<%= Rails.configuration.sybil.close_user_picker %>) hideSybilUserPicker();
-		});
+		}, false);
 		
 		// Add click listener to body, hide UP if click is anywhere but on the UP itself
 		document.body.addEventListener('click', function(e){
@@ -80,7 +77,7 @@
 			var curNode = e.target;
 			// Iterate over parents of target (only check 3 nodes deep, that's as deep as the UP gets)
 			// If parent is UP, set boolean, if parent is body, break
-			for(var i=0;i<2;i++)
+			for(var i=0;i<3;i++)
 			{
 				if(childOfUserPicker = (curNode === up)) break;
 				curNode = curNode.parentNode;
@@ -90,6 +87,6 @@
 			// Hide the UP if target isn't a child of the UP or the UP itself
 			if(!childOfUserPicker)
 				hideSybilUserPicker();
-		});
-	};
+		}, false);
+	}, false);
 </script>
