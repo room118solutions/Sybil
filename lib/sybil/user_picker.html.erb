@@ -1,4 +1,4 @@
-<form id="sybil_user_picker" style="display:none;position:fixed;left:25%;top:0;width:50%;padding: 20px; background-color:rgba(0,0,0,.8); text-align:center;border-radius:5px;box-shadow: 0 0 5px 5px rgba(0,0,0,.5);z-index:999;" action="<%= sybil_path %>" method="post">
+<form id="sybil_user_picker" style="display:none;position:fixed;left:25%;top:0;width:50%;padding: 20px; background-color: #000; background-color:rgba(0,0,0,.8); text-align:center;border-radius:5px;box-shadow: 0 0 5px 5px rgba(0,0,0,.5);z-index:999;" action="<%= sybil_path %>" method="post">
 	<h1 style="color:white;border-bottom:solid white 1px;padding-bottom:5px;font-size:200%;">Sybil</h1>
 	<br />
 	<select name="id">
@@ -10,17 +10,23 @@
 	<input type="hidden" name="layout" value="<%= @layout %>">
 	<input type="submit" value="Switch">
 </form>
-<script>
-	// TODO: Thoroughly cross-browser test, because we're no longer using jQuery (Tested in Chrome, FF4, Safari 5, and IE9, <IE9 is known to be broken, need to handle events the IE way)
-	window.addEventListener('load', function(){
+<script>	
+	function sybilAddEvent(el, event, fn, c){
+		if(el.addEventListener)
+			el.addEventListener(event, fn, c);
+		else
+			el.attachEvent('on' + event, fn);
+	}
+	
+	sybilAddEvent(window, 'load', function(){
 		var up = document.getElementById('sybil_user_picker');
-		
+
 		// If jQuery is present, set up a var and position userpicker, since it'll be animated
 		if(window.jQuery){
 			var $up = $(up);
 			$up.css('top', -($up.height()+40));
 		}
-		
+
 		// Hide UP, slide up if jQuery
 		function hideSybilUserPicker(){
 			if(window.jQuery)
@@ -28,7 +34,7 @@
 			else
 				up.style.display='none';
 		}
-		
+
 		// Show UP, slide down if jQuery
 		function showSybilUserPicker(){
 			if(window.jQuery)
@@ -39,7 +45,7 @@
 				up.style.display='block';
 			}
 		}
-		
+
 		// Find submit button
 		for(var i=0;i<up.children.length;i++)
 		{
@@ -56,9 +62,9 @@
 				}
 			}
 		}
-		
+
 		// Add key listener
-		document.addEventListener('keyup', function(e){
+		sybilAddEvent(document, 'keyup', function(e){
 			if(<%= Rails.configuration.sybil.toggle_user_picker %>){
 				if(up.style.display == 'none')
 				{
@@ -67,14 +73,14 @@
 					hideSybilUserPicker();
 				}
 			}
-				
+		
 			if(<%= Rails.configuration.sybil.close_user_picker %>) hideSybilUserPicker();
 		}, false);
-		
+
 		// Add click listener to body, hide UP if click is anywhere but on the UP itself
-		document.body.addEventListener('click', function(e){
+		sybilAddEvent(document.body, 'click', function(e){
 			var childOfUserPicker = false;
-			var curNode = e.target;
+			var curNode = (e.srcElement) ? e.srcElement : e.target;
 			// Iterate over parents of target (only check 3 nodes deep, that's as deep as the UP gets)
 			// If parent is UP, set boolean, if parent is body, break
 			for(var i=0;i<3;i++)
@@ -83,7 +89,7 @@
 				curNode = curNode.parentNode;
 				if(curNode == document.body) break;
 			}
-			
+
 			// Hide the UP if target isn't a child of the UP or the UP itself
 			if(!childOfUserPicker)
 				hideSybilUserPicker();
