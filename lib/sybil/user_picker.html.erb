@@ -23,7 +23,7 @@
 
 		// If jQuery is present, set up a var and position userpicker, since it'll be animated
 		if(window.jQuery){
-			var $up = $(up);
+			var $up = window.jQuery(up);
 			$up.css('top', -($up.height()+40));
 		}
 
